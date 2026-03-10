@@ -1,0 +1,722 @@
+import React, { useState } from 'react';
+import { 
+  Home, 
+  Map, 
+  Compass, 
+  User, 
+  MapPin, 
+  Utensils, 
+  Train, 
+  ChevronRight,
+  Coffee,
+  Info,
+  Sparkles,
+  Loader2,
+  Wand2,
+  X,
+  Navigation
+} from 'lucide-react';
+
+// --- Mock Data (模擬數據) ---
+const mtrData = [
+  {
+    line: '港島線',
+    color: 'bg-blue-600',
+    stations: [
+      {
+        name: '上環',
+        attractions: [
+          { name: 'PMQ 元創方', desc: '文青必逛！前已婚警察宿舍改建的創意設計樞紐。' },
+          { name: '摩羅上街 (古董街)', desc: '尋寶好去處，充滿歷史感的特色老街。' }
+        ],
+        food: [
+          { name: '勝香園', desc: '人氣大排檔，必吃番茄牛肉麵與檸蜜脆脆。' },
+          { name: '生記粥品專家', desc: '米其林推薦，魚腩粥鮮甜綿滑，份量十足。' },
+          { name: '瑞記咖啡', desc: '隱身街市的老字號，樽仔奶茶與蛋牛包是絕配。' }
+        ]
+      },
+      {
+        name: '中環',
+        attractions: [
+          { name: '大館 Tai Kwun', desc: '歷史建築活化，結合藝術與古蹟。' },
+          { name: '太平山頂', desc: '搭乘山頂纜車，俯瞰維多利亞港日夜景。' },
+          { name: '蘭桂坊', desc: '香港著名的酒吧與夜生活區。' }
+        ],
+        food: [
+          { name: '一樂燒鵝', desc: '連續多年米其林一星，燒鵝皮脆肉嫩多汁。' },
+          { name: '蘭芳園', desc: '絲襪奶茶始祖，蔥油雞扒撈丁也極受歡迎。' },
+          { name: '泰昌餅家', desc: '招牌曲奇皮蛋撻，剛出爐時香氣四溢。' },
+          { name: '九記牛腩', desc: '永遠在排隊的濃郁清湯牛腩與咖哩牛筋腩。' }
+        ]
+      },
+      {
+        name: '灣仔',
+        attractions: [
+          { name: '利東街 (囍帖街)', desc: '充滿歐陸風情的步行街，節日燈飾極美。' },
+          { name: '藍屋', desc: '具嶺南建築特色的百年歷史建築。' }
+        ],
+        food: [
+          { name: '甘牌燒鵝', desc: '米其林一星，肥瘦適中的燒鵝與特製梅子醬。' },
+          { name: '華星冰室', desc: '明星常客加持，黑松露炒蛋多士香氣撲鼻。' },
+          { name: '靠得住粥麵小館', desc: '米其林必比登推薦，首創心肝寶貝粥。' }
+        ]
+      },
+      {
+        name: '銅鑼灣',
+        attractions: [
+          { name: '時代廣場', desc: '大型購物中心，時常有特色展覽。' },
+          { name: '維多利亞公園', desc: '香港島最大的公園，鬧市中的綠洲。' }
+        ],
+        food: [
+          { name: '何洪記粥麵專家', desc: '米其林一星，雲吞麵與干炒牛河必點。' },
+          { name: '新記車仔麵', desc: '香濃辣汁配上各式入味配料，宵夜首選。' },
+          { name: '榮記粉麵', desc: '招牌豬紅蘿蔔雞翼麵，湯底濃郁帶甜。' },
+          { name: '聰嫂星級甜品', desc: '龍眼椰果冰，清涼解暑，口感豐富。' }
+        ]
+      }
+    ]
+  },
+  {
+    line: '荃灣線',
+    color: 'bg-red-500',
+    stations: [
+      {
+        name: '尖沙咀',
+        attractions: [
+          { name: '維多利亞港', desc: '星光大道散步，欣賞晚上八點的幻彩詠香江。' },
+          { name: 'K11 MUSEA', desc: '結合藝術與文化的奢華購物中心。' },
+          { name: '天星小輪', desc: '百年歷史渡輪，平價享受海港風情。' }
+        ],
+        food: [
+          { name: '洪利粥店茶餐廳', desc: '生滾粥與金黃炸兩，早餐宵夜好去處。' },
+          { name: '媽咪雞蛋仔', desc: '米其林街頭小吃推薦，多種創新口味外脆內軟。' },
+          { name: '華嫂冰室', desc: '招牌冰花奶茶與番茄豬扒雞翼通粉。' }
+        ]
+      },
+      {
+        name: '佐敦',
+        attractions: [
+          { name: '廟街夜市', desc: '體驗香港草根文化，品嚐街頭小吃與算命攤。' }
+        ],
+        food: [
+          { name: '澳洲牛奶公司', desc: '光速出餐！神級炒雙蛋厚多士與蛋白燉鮮奶。' },
+          { name: '佳佳甜品', desc: '米其林推薦中式糖水，寧波薑汁湯丸必吃。' },
+          { name: '麥文記麵家', desc: '首創全蝦雲吞，麵條爽口彈牙。' }
+        ]
+      },
+      {
+        name: '旺角',
+        attractions: [
+          { name: '女人街', desc: '充滿地道色彩的露天市集。' },
+          { name: '金魚街', desc: '一袋袋金魚掛在牆上，獨特的香港街景。' }
+        ],
+        food: [
+          { name: '金華冰廳', desc: '號稱全香港最好吃的菠蘿油，酥脆重奶油香。' },
+          { name: '肥姐小食店', desc: '必吃大皇牌！冰鎮滷水墨魚與生腸，配上黃芥末。' },
+          { name: '富記粥品', desc: '生滾粥與燒鵝，暖胃首選老字號。' },
+          { name: '奇趣餅家', desc: '懷舊中式糕點，紅豆燒餅煙韌不甜膩。' }
+        ]
+      },
+      {
+        name: '深水埗',
+        attractions: [
+          { name: '大南街', desc: '新興文青聖地，充滿特色咖啡店與手作選物店。' },
+          { name: '鴨寮街', desc: '尋寶電子零件與二手商品的平民市集。' }
+        ],
+        food: [
+          { name: '合益泰小食', desc: '米其林街頭小吃，滑溜腸粉配上麻醬是絕配。' },
+          { name: '維記咖啡粉麵', desc: '招牌豬潤牛肉麵，湯頭鮮甜，豬潤爽脆。' },
+          { name: '公和荳品廠', desc: '百年老店，滑嫩豆腐花與香煎釀豆腐。' },
+          { name: '劉森記麵家', desc: '竹昇麵專家，蝦籽撈麵與黑牛百葉必試。' }
+        ]
+      }
+    ]
+  }
+];
+
+const dailyCards = {
+  attractions: [
+    { title: '西九文化區', subtitle: '藝術與海景的完美結合', desc: '在M+博物館欣賞視覺文化，或在海濱長廊草地野餐，享受維港日落。', tag: '景點' },
+    { title: '彩虹邨', subtitle: '經典公屋打卡熱點', desc: '充滿年代感的馬卡龍色調外牆，是攝影愛好者的必訪之地。', tag: '景點' },
+    { title: '太平山頂', subtitle: '俯瞰東方之珠', desc: '搭乘復古纜車緩緩升空，將維多利亞港的日夜雙景盡收眼底。', tag: '景點' }
+  ],
+  food: [
+    { title: '甘牌燒鵝', subtitle: '米其林一星燒味', desc: '皮脆肉嫩，油脂分佈完美，搭配特製梅子醬，令人回味無窮。', tag: '餐廳' },
+    { title: '澳洲牛奶公司', subtitle: '光速出餐的滑蛋傳奇', desc: '佐敦必吃！炒雙蛋厚多士與燉奶，體驗香港獨特的快節奏茶餐廳文化。', tag: '餐廳' },
+    { title: 'Bakehouse', subtitle: '超人氣酸種蛋撻', desc: '前四季酒店糕點主廚主理，酥脆塔皮與濃郁內餡的完美平衡。', tag: '餐廳' }
+  ],
+  transport: [
+    { title: '叮叮車 (香港電車)', subtitle: '最慢也最浪漫的交通工具', desc: '僅在港島行駛。無論距離多遠，成人車資僅需 $3 HKD，適合慢遊感受城市脈動。', tag: '交通' },
+    { title: '機場快線', subtitle: '市區到機場的最快途徑', desc: '24分鐘直達中環，部分機票還支援市區預辦登機服務，非常方便。', tag: '交通' },
+    { title: '天星小輪', subtitle: '橫渡維港的百年經典', desc: '銅板價就能享受的海景視角，被國家地理譽為「人生必遊的50個景點」之一。', tag: '交通' }
+  ]
+};
+
+// --- Gemini API Utility ---
+const apiKey = "";
+
+const fetchGemini = async (prompt) => {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    systemInstruction: { parts: [{ text: "你是一個香港在地旅遊達人。回答請保持簡潔、直觀、重點明確，直接給出實用資訊，不要使用過度包裝或文青的修辭。請務必使用繁體中文。" }] }
+  };
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) throw new Error('API request failed');
+      const data = await response.json();
+      return data.candidates?.[0]?.content?.parts?.[0]?.text || "無法獲取內容，請稍後再試。";
+    } catch (error) {
+      if (attempt === 4) return "系統似乎在休息，請稍後再試。";
+      await new Promise(res => setTimeout(res, Math.pow(2, attempt) * 1000));
+    }
+  }
+};
+
+// --- Components ---
+
+// 1. Home View
+const HomeView = () => (
+  <div className="animate-fade-in pb-24 md:pb-12 max-w-5xl mx-auto w-full">
+    <header className="px-6 py-8 md:py-10">
+      <h1 className="text-2xl md:text-3xl font-medium tracking-wider text-gray-800">探索香港</h1>
+      <p className="text-sm text-gray-500 mt-2">尋找街角的地道風味與風景</p>
+    </header>
+
+    <div className="px-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* 本週精選 - 佔據更大空間 */}
+        <div className="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 shadow-[0_2px_10px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-col justify-center">
+          <h2 className="text-lg md:text-xl font-medium text-gray-800 flex items-center gap-2 mb-4 md:mb-6">
+            <Compass className="w-5 h-5 text-gray-400" />
+            本週精選
+          </h2>
+          <div className="aspect-[4/3] md:aspect-[21/9] rounded-xl bg-gray-100 mb-6 flex items-center justify-center overflow-hidden relative group">
+             <div className="absolute inset-0 bg-[#e6e2db] mix-blend-multiply opacity-20 transition-opacity group-hover:opacity-40"></div>
+             <span className="text-gray-400 text-sm tracking-widest z-10">[ 維多利亞港夜景圖 ]</span>
+          </div>
+          <a 
+            href="https://www.google.com/maps/search/?api=1&query=星光大道+香港"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-gray-800 hover:text-amber-600 text-lg md:text-xl flex items-center gap-1.5 transition-colors w-fit"
+          >
+            夜遊維港，星光大道散步
+            <Navigation className="w-4 h-4 text-gray-400" />
+          </a>
+          <p className="text-sm md:text-base text-gray-500 mt-3 leading-relaxed">
+            吹著微涼的海風，欣賞對岸港島的摩天大樓天際線，這是感受香港繁華最直接的方式。晚上八點還能觀賞「幻彩詠香江」雷射燈光秀。
+          </p>
+        </div>
+
+        {/* 快速按鈕 - 桌面版排在右側 */}
+        <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
+          <div className="bg-[#f7f5f2] rounded-2xl p-5 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-[#f0ece5] cursor-pointer transition-colors group">
+            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <Utensils className="w-5 h-5 text-gray-600" />
+            </div>
+            <span className="text-sm md:text-base font-medium text-gray-700">附近美食</span>
+          </div>
+          <div className="bg-[#f7f5f2] rounded-2xl p-5 md:p-8 flex flex-col items-center justify-center gap-4 hover:bg-[#f0ece5] cursor-pointer transition-colors group">
+            <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+              <MapPin className="w-5 h-5 text-gray-600" />
+            </div>
+            <span className="text-sm md:text-base font-medium text-gray-700">熱門景點</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+// 2. MTR Stations View
+const MtrView = () => {
+  const [expandedStation, setExpandedStation] = useState('中環');
+  const [activeFood, setActiveFood] = useState(null);
+  const [foodDesc, setFoodDesc] = useState('');
+  const [isLoadingFood, setIsLoadingFood] = useState(false);
+
+  const handleFoodClick = async (foodName) => {
+    setActiveFood(foodName);
+    setFoodDesc('');
+    setIsLoadingFood(true);
+    const prompt = `介紹香港美食「${foodName}」。請簡潔說明這是什麼、口感如何，以及在地人通常怎麼吃。字數控制在80字以內。`;
+    const result = await fetchGemini(prompt);
+    setFoodDesc(result);
+    setIsLoadingFood(false);
+  };
+
+  return (
+    <div className="animate-fade-in pb-24 md:pb-8 h-full flex flex-col relative max-w-6xl mx-auto w-full">
+      <header className="px-6 py-6 md:py-8 bg-[#fcfcfc]/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
+        <h1 className="text-xl md:text-2xl font-medium tracking-wider text-gray-800">地鐵站指南</h1>
+        <p className="text-xs md:text-sm text-gray-500 mt-1">按地鐵站發掘周邊好去處</p>
+      </header>
+
+      <div className="px-6 py-4 md:py-6 flex-1 overflow-y-auto custom-scrollbar">
+        {/* 電腦版使用雙欄佈局呈現地鐵線 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
+          {mtrData.map((line) => (
+            <div key={line.line} className="space-y-4">
+              <div className="flex items-center gap-3">
+                <span className={`w-2.5 h-2.5 rounded-full ${line.color} shadow-sm`}></span>
+                <h2 className="text-sm font-medium text-gray-500 tracking-widest">{line.line}</h2>
+              </div>
+              
+              <div className="space-y-3">
+                {line.stations.map((station) => {
+                  const isExpanded = expandedStation === station.name;
+                  return (
+                    <div 
+                      key={station.name} 
+                      className={`border border-gray-100 rounded-2xl overflow-hidden transition-all duration-300 ${isExpanded ? 'bg-white shadow-[0_4px_20px_rgba(0,0,0,0.04)]' : 'bg-gray-50/50 hover:bg-gray-50'}`}
+                    >
+                      <button 
+                        onClick={() => setExpandedStation(isExpanded ? '' : station.name)}
+                        className="w-full px-5 py-4 md:py-5 flex items-center justify-between text-left"
+                      >
+                        <span className="font-medium text-gray-800 text-lg md:text-xl">{station.name}</span>
+                        <ChevronRight className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-5 pb-5 space-y-6 animate-fade-in">
+                          {/* Attractions */}
+                          <div>
+                            <h4 className="text-xs font-medium text-gray-400 mb-3 flex items-center gap-1.5 uppercase tracking-wider">
+                              <MapPin className="w-3.5 h-3.5" /> 推薦景點
+                            </h4>
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                              {station.attractions.map((item, idx) => (
+                                <li key={idx} className="bg-[#fbfbfb] p-3 md:p-4 rounded-xl border border-gray-50">
+                                  <a 
+                                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 香港')}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-medium text-gray-700 hover:text-amber-600 flex items-center gap-1.5 transition-colors w-fit"
+                                  >
+                                    {item.name}
+                                    <Navigation className="w-3 h-3 text-gray-400" />
+                                  </a>
+                                  <div className="text-xs md:text-sm text-gray-500 mt-1.5 leading-relaxed">{item.desc}</div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          {/* Food */}
+                          <div>
+                            <h4 className="text-xs font-medium text-gray-400 mb-3 flex items-center gap-1.5 uppercase tracking-wider">
+                              <Utensils className="w-3.5 h-3.5" /> 必吃美食
+                            </h4>
+                            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
+                              {station.food.map((item, idx) => (
+                                <li key={idx} className="bg-[#fbfbfb] p-3 md:p-4 rounded-xl border border-gray-50 flex justify-between items-start gap-2">
+                                  <div>
+                                    <a 
+                                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.name + ' 香港')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-sm font-medium text-gray-700 hover:text-amber-600 flex items-center gap-1.5 transition-colors w-fit"
+                                    >
+                                      {item.name}
+                                      <Navigation className="w-3 h-3 text-gray-400" />
+                                    </a>
+                                    <div className="text-xs md:text-sm text-gray-500 mt-1.5 leading-relaxed">{item.desc}</div>
+                                  </div>
+                                  <button 
+                                    onClick={() => handleFoodClick(item.name)}
+                                    className="mt-1 flex-shrink-0 bg-white hover:bg-amber-50 border border-gray-100 hover:border-amber-100 text-gray-600 p-1.5 md:px-2.5 md:py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm"
+                                  >
+                                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                    <span className="text-[10px] md:text-xs font-medium tracking-wider whitespace-nowrap">在地吃法</span>
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Food Detail Modal (Responsive: Bottom Sheet on Mobile, Modal on Desktop) */}
+      {activeFood && (
+        <div className="absolute inset-0 z-50 flex items-end md:items-center justify-center bg-gray-900/30 backdrop-blur-sm animate-fade-in md:p-6">
+          <div className="bg-white w-full md:max-w-md rounded-t-3xl md:rounded-3xl p-6 pb-safe md:pb-6 shadow-2xl transform transition-transform">
+            <div className="flex justify-between items-center mb-5">
+              <h3 className="text-lg md:text-xl font-medium text-gray-800 flex items-center gap-2">
+                <Coffee className="w-5 h-5 text-amber-600" /> {activeFood}
+              </h3>
+              <button onClick={() => setActiveFood(null)} className="p-1.5 rounded-full bg-gray-50 text-gray-500 hover:bg-gray-100 transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="bg-[#fcfbf9] rounded-2xl p-6 border border-[#f4f1eb] min-h-[120px] flex items-center justify-center">
+              {isLoadingFood ? (
+                <div className="flex flex-col items-center gap-3 text-gray-400">
+                  <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+                  <span className="text-xs tracking-widest uppercase">載入在地風味中...</span>
+                </div>
+              ) : (
+                <p className="text-sm md:text-base text-gray-600 leading-relaxed tracking-wide">
+                  {foodDesc}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// 3. Daily Cards View
+const DailyCardsView = () => {
+  const [activeCategory, setActiveCategory] = useState('attractions');
+
+  const categories = [
+    { id: 'attractions', label: '景點', icon: MapPin },
+    { id: 'food', label: '餐廳', icon: Coffee },
+    { id: 'transport', label: '交通', icon: Train },
+  ];
+
+  return (
+    <div className="animate-fade-in pb-24 md:pb-8 h-full flex flex-col max-w-6xl mx-auto w-full">
+      <header className="px-6 py-6 md:py-8">
+        <h1 className="text-xl md:text-2xl font-medium tracking-wider text-gray-800">每日指南</h1>
+        <p className="text-xs md:text-sm text-gray-500 mt-1">為您挑選今日最佳行程</p>
+      </header>
+
+      {/* Category Tabs */}
+      <div className="px-6 mb-6 md:mb-8 max-w-md">
+        <div className="flex p-1.5 bg-gray-100/80 rounded-full">
+          {categories.map(cat => {
+            const Icon = cat.icon;
+            const isActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm rounded-full transition-all duration-300 ${
+                  isActive ? 'bg-white text-gray-800 shadow-sm font-medium' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                {cat.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Cards Grid (Responsive) */}
+      <div className="px-6 pb-10 overflow-y-auto custom-scrollbar flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {dailyCards[activeCategory].map((card, idx) => (
+            <div key={idx} className="bg-white rounded-3xl p-6 md:p-8 shadow-[0_8px_30px_rgba(0,0,0,0.03)] border border-gray-100 relative overflow-hidden group hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all">
+              {/* Card Background Decoration (Minimalist) */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#f4f1eb] rounded-bl-full opacity-50 -z-10 transition-transform duration-500 group-hover:scale-110"></div>
+              
+              <div className="inline-block px-3 py-1 bg-gray-800 text-white text-[10px] md:text-xs tracking-widest rounded-full mb-5">
+                {card.tag}推薦
+              </div>
+              <h2 className="text-2xl md:text-3xl font-medium text-gray-800 mb-2">{card.title}</h2>
+              <h3 className="text-sm md:text-base font-medium text-[#a39a8c] mb-5">{card.subtitle}</h3>
+              
+              <div className="w-full h-[1px] bg-gray-100 my-5"></div>
+              
+              <p className="text-sm md:text-base text-gray-500 leading-relaxed mb-8">
+                {card.desc}
+              </p>
+              
+              <div className="absolute bottom-6 right-6">
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(card.title + ' 香港')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-amber-50 hover:text-amber-600 transition-colors shadow-sm"
+                >
+                   <Navigation className="w-4 h-4 md:w-5 md:h-5" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// 4. AI Planner View
+const AiPlannerView = () => {
+  const [station, setStation] = useState('中環');
+  const [hours, setHours] = useState('2');
+  const [vibe, setVibe] = useState('文青悠閒');
+  const [plan, setPlan] = useState('');
+  const [isPlanning, setIsPlanning] = useState(false);
+
+  const handleGeneratePlan = async () => {
+    setIsPlanning(true);
+    setPlan('');
+    const prompt = `我現在在香港的「${station}」站附近，有「${hours}小時」的空閒時間，想要體驗「${vibe}」的行程。請幫我安排一個順路的計畫，包含一個景點和一間餐廳/咖啡廳。請以條列式呈現，語氣請簡潔、直觀、不囉嗦。`;
+    const result = await fetchGemini(prompt);
+    setPlan(result);
+    setIsPlanning(false);
+  };
+
+  return (
+    <div className="animate-fade-in pb-24 md:pb-8 h-full flex flex-col max-w-6xl mx-auto w-full">
+      <header className="px-6 py-6 md:py-8 bg-[#fcfcfc]/90 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
+        <h1 className="text-xl md:text-2xl font-medium tracking-wider text-gray-800 flex items-center gap-2">
+          <Wand2 className="w-6 h-6 text-amber-500" /> AI 專屬行程
+        </h1>
+        <p className="text-xs md:text-sm text-gray-500 mt-1">告訴我你的狀態，為你即興規劃</p>
+      </header>
+
+      {/* 電腦版使用左右雙欄對照 */}
+      <div className="px-6 py-6 flex-1 overflow-y-auto custom-scrollbar grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-start">
+        {/* 左側：控制表單 */}
+        <div className="space-y-6 bg-white p-6 md:p-8 rounded-2xl border border-gray-100 shadow-[0_2px_15px_rgba(0,0,0,0.02)]">
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-3">出發地鐵站</label>
+            <select 
+              value={station} 
+              onChange={(e) => setStation(e.target.value)}
+              className="w-full bg-[#fcfbf9] border border-gray-200 text-gray-700 text-sm md:text-base rounded-xl px-4 py-3.5 focus:outline-none focus:border-amber-300 transition-colors cursor-pointer"
+            >
+              <option value="中環">中環</option>
+              <option value="上環">上環</option>
+              <option value="灣仔">灣仔</option>
+              <option value="銅鑼灣">銅鑼灣</option>
+              <option value="尖沙咀">尖沙咀</option>
+              <option value="旺角">旺角</option>
+              <option value="深水埗">深水埗</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-3">空閒時間</label>
+            <div className="flex gap-2 md:gap-3">
+              {['1', '2', '4', '半天'].map(h => (
+                <button 
+                  key={h}
+                  onClick={() => setHours(h)}
+                  className={`flex-1 py-3 text-sm md:text-base rounded-xl transition-all ${hours === h ? 'bg-gray-800 text-white shadow-md' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                >
+                  {h} {h === '半天' ? '' : '小時'}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-500 mb-3">想要什麼氛圍？</label>
+            <div className="flex flex-wrap gap-2 md:gap-3">
+              {['文青悠閒', '地道小吃', '瘋狂購物', '歷史探索'].map(v => (
+                <button 
+                  key={v}
+                  onClick={() => setVibe(v)}
+                  className={`px-4 md:px-5 py-2.5 text-sm rounded-full transition-all ${vibe === v ? 'bg-[#a39a8c] text-white shadow-md' : 'bg-[#f4f1eb] text-gray-600 hover:bg-[#eadecc]'}`}
+                >
+                  {v}
+                </button>
+              ))}
+            </div>
+          </div>
+          <button 
+            onClick={handleGeneratePlan}
+            disabled={isPlanning}
+            className="w-full mt-4 bg-gray-800 hover:bg-gray-700 text-white font-medium text-base py-4 rounded-xl transition-all flex justify-center items-center gap-2 disabled:opacity-70 shadow-lg"
+          >
+            {isPlanning ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5 text-amber-300" />}
+            ✨ 讓 AI 為我規劃 ✨
+          </button>
+        </div>
+
+        {/* 右側：生成結果 (預設隱藏直到觸發) */}
+        {(plan || isPlanning) && (
+          <div className="bg-[#f7f5f2] rounded-2xl p-6 md:p-8 border border-[#eadecc] animate-fade-in relative overflow-hidden h-full min-h-[300px]">
+             {isPlanning ? (
+               <div className="flex flex-col items-center justify-center h-full min-h-[250px] gap-4 text-gray-500">
+                  <Wand2 className="w-10 h-10 animate-pulse text-[#a39a8c]" />
+                  <p className="text-sm md:text-base tracking-widest uppercase">正在為您拼湊完美街景...</p>
+               </div>
+             ) : (
+               <div className="prose prose-sm md:prose-base text-gray-700 prose-p:leading-relaxed prose-li:marker:text-[#a39a8c]">
+                 {plan.split('\n').map((line, i) => (
+                   <p key={i} className="min-h-[1em] mb-2">{line}</p>
+                 ))}
+               </div>
+             )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+// --- Main App Component ---
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('home');
+
+  const navItems = [
+    { id: 'home', icon: <Home />, label: '首頁' },
+    { id: 'mtr', icon: <Map />, label: '地鐵指南' },
+    { id: 'daily', icon: <Compass />, label: '每日推薦' },
+    { id: 'planner', icon: <Wand2 />, label: 'AI行程' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex text-[#333] font-sans">
+      
+      {/* 桌面版左側導覽列 (Sidebar) - 大於 md 尺寸顯示 */}
+      <aside className="hidden md:flex flex-col w-64 lg:w-72 bg-white border-r border-gray-100 h-screen sticky top-0 z-20 flex-shrink-0">
+        <div className="px-8 py-10">
+          <h1 className="text-2xl font-medium tracking-wider text-gray-800">探索香港</h1>
+          <p className="text-xs text-gray-400 mt-2 uppercase tracking-widest">Minimalist Guide</p>
+        </div>
+        <nav className="flex-1 px-4 space-y-2 mt-4">
+          {navItems.map(tab => (
+            <NavItem 
+              key={tab.id}
+              variant="desktop"
+              icon={tab.icon} 
+              label={tab.label} 
+              isActive={activeTab === tab.id} 
+              onClick={() => setActiveTab(tab.id)} 
+            />
+          ))}
+        </nav>
+        <div className="p-8">
+          <div className="text-[10px] text-gray-300 tracking-widest uppercase">
+            © 2026 Muji Style Guide
+          </div>
+        </div>
+      </aside>
+
+      {/* 右側主內容區 */}
+      <div className="flex-1 h-screen relative flex flex-col overflow-hidden bg-[#fcfcfc] w-full">
+        
+        {/* 動態渲染 View */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar relative">
+          {activeTab === 'home' && <HomeView />}
+          {activeTab === 'mtr' && <MtrView />}
+          {activeTab === 'daily' && <DailyCardsView />}
+          {activeTab === 'planner' && <AiPlannerView />}
+        </main>
+
+        {/* 手機版底部導覽列 (Bottom Nav) - 小於 md 尺寸顯示 */}
+        <nav className="md:hidden absolute bottom-0 w-full bg-white/95 backdrop-blur-lg border-t border-gray-100 pb-safe pt-2 px-6 pb-6 flex justify-between items-center z-50">
+          {navItems.map(tab => (
+            <NavItem 
+              key={tab.id}
+              variant="mobile"
+              icon={tab.icon} 
+              label={tab.label} 
+              isActive={activeTab === tab.id} 
+              onClick={() => setActiveTab(tab.id)} 
+            />
+          ))}
+        </nav>
+      </div>
+
+      {/* Tailwind & Custom CSS */}
+      <style dangerouslySetInnerHTML={{__html: `
+        /* 手機隱藏滾動條 */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 電腦版優雅的極簡滾動條 */
+        @media (min-width: 768px) {
+          .custom-scrollbar::-webkit-scrollbar {
+              width: 6px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-track {
+              background: transparent;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+              background-color: #e5e5e5;
+              border-radius: 10px;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background-color: #d4d4d4;
+          }
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.4s ease-out forwards;
+        }
+        .pb-safe {
+          padding-bottom: env(safe-area-inset-bottom, 24px);
+        }
+      `}} />
+    </div>
+  );
+}
+
+// 導覽按鈕元件 (支援 mobile 底部 & desktop 側邊欄兩種型態)
+const NavItem = ({ icon, label, isActive, onClick, variant }) => {
+  if (variant === 'desktop') {
+    return (
+      <button 
+        onClick={onClick}
+        className={`flex items-center gap-4 px-6 py-4 w-full transition-all duration-300 rounded-2xl ${
+          isActive ? 'bg-[#f4f1eb] text-gray-800' : 'text-gray-400 hover:bg-gray-50 hover:text-gray-600'
+        }`}
+      >
+        <div className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`}>
+          {React.cloneElement(icon, { 
+            className: `w-5 h-5 ${isActive ? 'stroke-[2.5px] text-amber-700' : 'stroke-2'}` 
+          })}
+        </div>
+        <span className={`text-sm tracking-widest transition-all duration-300 ${
+          isActive ? 'font-medium' : 'font-normal'
+        }`}>
+          {label}
+        </span>
+      </button>
+    );
+  }
+
+  // Mobile 版本
+  return (
+    <button 
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center gap-1.5 w-16 transition-all duration-300 ${
+        isActive ? 'text-gray-800' : 'text-gray-400 hover:text-gray-600'
+      }`}
+    >
+      <div className={`transition-transform duration-300 ${isActive ? 'scale-110' : 'scale-100'}`}>
+        {React.cloneElement(icon, { 
+          className: `w-[22px] h-[22px] ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}` 
+        })}
+      </div>
+      <span className={`text-[10px] tracking-wider transition-all duration-300 ${
+        isActive ? 'font-medium opacity-100' : 'font-normal opacity-80'
+      }`}>
+        {label}
+      </span>
+    </button>
+  );
+};
